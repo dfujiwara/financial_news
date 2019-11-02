@@ -1,0 +1,11 @@
+{
+  "name": "financial_news",
+  "version": "1.0.0",
+  "description": "Financial news and sentiment tracker",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "daisuke.fujiwara@gmail.com",
+  "license": "MIT"
+}
