@@ -7,5 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "daisuke.fujiwara@gmail.com",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "rss-parser": "^3.7.3"
+  }
 }
