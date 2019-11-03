@@ -10,5 +10,8 @@
   "license": "MIT",
   "dependencies": {
     "rss-parser": "^3.7.3"
+  },
+  "devDependencies": {
+    "typescript": "^3.6.4"
   }
 }
