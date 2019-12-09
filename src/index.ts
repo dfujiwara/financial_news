@@ -1,12 +1,16 @@
 import Parser = require('rss-parser')
+import { rssURLList } from './rssConfig'
 
 let parser = new Parser()
-let run = async () => {
-  let feed = await parser.parseURL("https://www.reddit.com/.rss")
+let run = async (url: string) => {
+  let feed = await parser.parseURL(url)
   console.log(feed.title)
 
   feed.items.forEach(item => {
     console.log(item.title + ":" + item.link)
   })
 }
-run()
+
+rssURLList.map((url) => {
+    run(url)
+})
