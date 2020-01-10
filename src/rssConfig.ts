@@ -1,3 +1,1 @@
-const rssURLList = ['https://www.ft.com/?format=rss']
-
-export { rssURLList }
+export const rssURLList = ['https://www.ft.com/?format=rss']
