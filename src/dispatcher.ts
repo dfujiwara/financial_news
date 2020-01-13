@@ -1,4 +1,4 @@
-import { rssURLList } from './rssConfig'
+import { rssURLList } from './rss-config'
 import { PubSub } from '@google-cloud/pubsub'
 
 export function financialNews() {
