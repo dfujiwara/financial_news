@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc"
+    "build": "tsc",
+    "processor-run": "functions-framework --source=./dist/rss-processor.js --target=processRSS --signature-type=event"
   },
   "author": "daisuke.fujiwara@gmail.com",
   "license": "MIT",
