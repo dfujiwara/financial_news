@@ -1,9 +1,9 @@
-import Parser = require('rss-parser')
+import * as Parser from 'rss-parser'
 
 interface Message {
   data: string
 }
-export function processRSS(pubSubMessage: Message) {
+export function processNewsRSS(pubSubMessage: Message) {
   let parser = new Parser()
   const decodedData = Buffer.from(pubSubMessage.data, 'base64').toString()
   const { url } = JSON.parse(decodedData)
