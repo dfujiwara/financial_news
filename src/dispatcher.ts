@@ -1,7 +1,7 @@
 import { rssURLList } from './rss-config'
 import { PubSub } from '@google-cloud/pubsub'
 
-export function financialNews() {
+export function dispatchFinancialNewsProcessing () {
     const pubsub = new PubSub()
     const topic = pubsub.topic('financial_new_dispatcher')
     const promises = rssURLList.map(url => {
