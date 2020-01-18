@@ -6,9 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "dispatcher": "npm run build && gcloud functions deploy financial-news-dispatcher --entry-point dispatchFinancialNewsProcessing --runtime nodejs8 --trigger-topic financial_news_dispatching",
+    "dispatcher": "npm run build && gcloud functions deploy financial-news-dispatcher --entry-point dispatchFinancialNewsProcessing --runtime nodejs8 --trigger-topic financial-news-dispatching",
     "local-rss-processor": "npm run build && functions-framework --source=./dist/index.js --target=processNewsRSS --signature-type=event",
-    "rss-processor": "npm run build && gcloud functions deploy news-rss-processor --entry-point processNewsRSS --runtime nodejs8 --trigger-topic financial_news_processing",
+    "rss-processor": "npm run build && gcloud functions deploy news-rss-processor --entry-point processNewsRSS --runtime nodejs8 --trigger-topic financial-news-processing",
     "deploy": "npm run dispatcher && npm run rss-processor"
   },
   "author": "daisuke.fujiwara@gmail.com",
