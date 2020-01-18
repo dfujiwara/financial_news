@@ -1,8 +1,12 @@
 import Parser = require('rss-parser')
 
-export function processRSS(data: string) {
+interface Message {
+  data: string
+}
+export function processRSS(pubSubMessage: Message) {
   let parser = new Parser()
-  const {url } = JSON.parse(data)
+  const decodedData = Buffer.from(pubSubMessage.data, 'base64').toString()
+  const { url } = JSON.parse(decodedData)
   if (!url) {
     console.log('invalid payload')
     return
