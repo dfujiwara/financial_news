@@ -3,7 +3,7 @@ import { PubSub } from '@google-cloud/pubsub'
 
 export function dispatchFinancialNewsProcessing () {
     const pubsub = new PubSub()
-    const topic = pubsub.topic('financial_new_dispatcher')
+    const topic = pubsub.topic('financial-news-processing')
     const promises = rssURLList.map(url => {
         const json = { url }
         return topic.publishJSON({ json })
