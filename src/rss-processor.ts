@@ -8,7 +8,7 @@ export function processNewsRSS(pubSubMessage: Message) {
   const decodedData = Buffer.from(pubSubMessage.data, 'base64').toString()
   const { url } = JSON.parse(decodedData)
   if (!url) {
-    console.log('invalid payload')
+    console.error(`invalid payload: ${decodedData}`)
     return
   }
   let run = async (url: string) => {
