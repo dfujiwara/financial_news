@@ -6,7 +6,7 @@ interface Message {
 export function processNewsRSS(pubSubMessage: Message) {
   let parser = new Parser()
   const decodedData = Buffer.from(pubSubMessage.data, 'base64').toString()
-  const { url } = JSON.parse(decodedData)
+  const { json: { url: url} } = JSON.parse(decodedData)
   if (!url) {
     console.error(`invalid payload: ${decodedData}`)
     return
