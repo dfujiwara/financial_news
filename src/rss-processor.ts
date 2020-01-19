@@ -1,9 +1,16 @@
 import * as Parser from 'rss-parser'
+import * as Language from '@google-cloud/language'
 
 interface Message {
   data: string
 }
-export function processNewsRSS(pubSubMessage: Message) {
+
+interface SentimentAnalysisResult {
+  score: number,
+  magnitude: number
+}
+
+export async function processNewsRSS(pubSubMessage: Message): Promise<SentimentAnalysisResult[]> {
   let parser = new Parser()
   const decodedData = Buffer.from(pubSubMessage.data, 'base64').toString()
   const { json: { url: url} } = JSON.parse(decodedData)
@@ -11,12 +18,24 @@ export function processNewsRSS(pubSubMessage: Message) {
     console.error(`invalid payload: ${decodedData}`)
     return
   }
-  let run = async (url: string) => {
-    let feed = await parser.parseURL(url)
-    console.log(feed.title)
-    feed.items.forEach(item => {
-      console.log(item.title + ":" + item.link)
-    })
+  let feed = await parser.parseURL(url)
+  const promises = feed.items.map(item => {
+    console.log(item.title + ":" + item.link)
+    return analyzeSentiment(`${item.title}:${item.contentSnippet}`)
+  })
+  return Promise.all(promises)
+}
+
+async function analyzeSentiment(content: string): Promise<SentimentAnalysisResult> {
+  const client = new Language.LanguageServiceClient()
+  const document = {
+    content,
+    type: "PLAIN_TEXT"
   }
-  return run(url)
+  const [result] = await client.analyzeSentiment({ document: document })
+  const sentiment = result.documentSentiment
+  console.log(`Text: ${content}`)
+  console.log(`Sentiment score: ${sentiment.score}`)
+  console.log(`Sentiment magnitude: ${sentiment.magnitude}`)
+  return {score: sentiment.score, magnitude: sentiment.magnitude}
 }
