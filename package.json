@@ -4,7 +4,7 @@
   "description": "Financial news and sentiment tracker",
   "main": "dist/index.js",
   "scripts": {
-    "test": "npm run build",
+    "test": "npm run build && jest",
     "build": "tsc",
     "dispatcher": "npm run build && gcloud functions deploy financial-news-dispatcher --entry-point dispatchFinancialNewsProcessing --runtime nodejs8 --trigger-topic financial-news-dispatching",
     "local-rss-processor": "npm run build && functions-framework --source=./dist/index.js --target=processNewsRSS --signature-type=event",
@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "@google-cloud/functions-framework": "^1.3.2",
+    "@types/jest": "^24.9.0",
     "jest": "^24.9.0",
     "typescript": "^3.6.4"
   }
