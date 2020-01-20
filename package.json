@@ -14,6 +14,7 @@
   "author": "daisuke.fujiwara@gmail.com",
   "license": "MIT",
   "dependencies": {
+    "@google-cloud/firestore": "^3.4.0",
     "@google-cloud/language": "^3.5.1",
     "@google-cloud/pubsub": "^1.2.0",
     "rss-parser": "^3.7.3"
