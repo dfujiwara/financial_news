@@ -1,7 +1,7 @@
 import * as Parser from 'rss-parser'
 import * as Language from '@google-cloud/language'
 
-interface Message {
+export interface Message {
   data: string
 }
 
@@ -15,8 +15,9 @@ export async function processNewsRSS(pubSubMessage: Message): Promise<SentimentA
   const decodedData = Buffer.from(pubSubMessage.data, 'base64').toString()
   const { json: { url: url} } = JSON.parse(decodedData)
   if (!url) {
-    console.error(`invalid payload: ${decodedData}`)
-    return
+    const error = `invalid payload: ${decodedData}`
+    console.error(error)
+    throw error
   }
   let feed = await parser.parseURL(url)
   const promises = feed.items.map(item => {
