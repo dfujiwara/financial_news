@@ -1,5 +1,5 @@
 import * as Parser from 'rss-parser'
-import * as Language from '@google-cloud/language'
+import { LanguageServiceClient } from '@google-cloud/language'
 
 export interface Message {
   data: string
@@ -28,7 +28,7 @@ export async function processNewsRSS(pubSubMessage: Message): Promise<SentimentA
 }
 
 async function analyzeSentiment(content: string): Promise<SentimentAnalysisResult> {
-  const client = new Language.LanguageServiceClient()
+  const client = new LanguageServiceClient()
   const document = {
     content,
     type: "PLAIN_TEXT"
