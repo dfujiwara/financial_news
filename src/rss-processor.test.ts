@@ -31,8 +31,7 @@ describe('For rss processing', () => {
                 callback?: (err: Error, feed: Parser.Output) => void,
                 redirectCount?: number
               ) => {
-                  return new Promise<Parser.Output>((resolve) => {
-                     resolve({
+                  return Promise.resolve({
                        items: [
                          {
                            title: "title",
@@ -42,13 +41,10 @@ describe('For rss processing', () => {
                          }
                        ]
                      })
-                   })
                 }
             )
             LanguageServiceClient.prototype.analyzeSentiment = jest.fn((document: {[index: string]: any}) => {
-                return new Promise<any>((resolve) => {
-                    resolve([{documentSentiment: {score: 10, magnitude: 11}}])
-                })
+                return Promise.resolve([{documentSentiment: {score: 10, magnitude: 11}}])
             })
         })
         test('sentiment results are returned correctly', async () => {
