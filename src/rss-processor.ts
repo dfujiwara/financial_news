@@ -2,7 +2,7 @@ import * as Parser from 'rss-parser'
 import { LanguageServiceClient } from '@google-cloud/language'
 import { Firestore } from '@google-cloud/firestore'
 
-interface SentimentAnalysisResult {
+export interface SentimentAnalysisResult {
   score: number,
   magnitude: number
 }
@@ -13,20 +13,27 @@ export interface NewsData {
   date: string
 }
 
+export interface SentimentAnalyzer {
+  analyze(content: string): Promise<SentimentAnalysisResult>
+}
+
 export interface NewsRssStorage {
   storeData(data: NewsData): Promise<void>
 }
 
 export class NewsRssParser {
+  private readonly analyzer: SentimentAnalyzer
   private readonly storage: NewsRssStorage
-  constructor(storage: NewsRssStorage = new Storage()) {
+
+  constructor(analyzer: SentimentAnalyzer = new Analyzer(), storage: NewsRssStorage = new Storage()) {
+    this.analyzer = analyzer
     this.storage = storage
   }
 
   async parse(url: string): Promise<NewsData[]> {
     let feed = await this.fetchRSS(url)
     const promises = feed.items.map(async item => {
-      const sentimentResult = await this.analyzeSentiment(`${item.title}:${item.contentSnippet}`)
+      const sentimentResult = await this.analyzer.analyze(`${item.title}:${item.contentSnippet}`)
       const data = {
         title: item.title,
         sentimentResult,
@@ -44,14 +51,19 @@ export class NewsRssParser {
     let feed = await parser.parseURL(url)
     return feed
   }
+}
 
-  private async analyzeSentiment(content: string): Promise<SentimentAnalysisResult> {
-    const client = new LanguageServiceClient()
+class Analyzer implements SentimentAnalyzer {
+  private readonly client: LanguageServiceClient
+  constructor() {
+    this.client = new LanguageServiceClient()
+  }
+  async analyze(content: string): Promise<SentimentAnalysisResult> {
     const document = {
       content,
       type: "PLAIN_TEXT"
     }
-    const [result] = await client.analyzeSentiment({ document: document })
+    const [result] = await this.client.analyzeSentiment({ document: document })
     const sentiment = result.documentSentiment
     return {score: sentiment.score, magnitude: sentiment.magnitude}
   }

@@ -1,11 +1,11 @@
-import { NewsRssParser, NewsRssStorage, NewsData } from './rss-processor'
+import { NewsRssParser, NewsRssStorage, SentimentAnalyzer } from './rss-processor'
 import * as Parser from 'rss-parser'
-import { LanguageServiceClient } from '@google-cloud/language'
 
 jest.mock('rss-parser')
-jest.mock('@google-cloud/language')
+
 describe('For rss processing', () => {
     let storage: NewsRssStorage
+    let analyzer: SentimentAnalyzer
     beforeEach(() => {
         Parser.prototype.parseURL = jest.fn(
             (
@@ -25,18 +25,18 @@ describe('For rss processing', () => {
                     })
             }
         )
-        LanguageServiceClient.prototype.analyzeSentiment = jest.fn((document: {[index: string]: any}) => {
-            return Promise.resolve([{documentSentiment: {score: 10, magnitude: 11}}])
-        })
         storage = {
             storeData: jest.fn()
         }
+        analyzer = {
+            analyze: jest.fn(() => Promise.resolve({score: 10, magnitude: 11}))
+        }
     })
     test('sentiment results are returned correctly', async () => {
-        const parser = new NewsRssParser(storage)
+        const parser = new NewsRssParser(analyzer, storage)
         const newsData = await parser.parse('https://news.com')
         expect(Parser).toHaveBeenCalledTimes(1)
-        expect(LanguageServiceClient).toHaveBeenCalledTimes(1)
+        expect(analyzer.analyze).toHaveBeenCalledTimes(1)
         expect(storage.storeData).toHaveBeenCalledTimes(1)
         expect(newsData.length).toEqual(1)
         expect(newsData[0].sentimentResult.score).toEqual(10)
