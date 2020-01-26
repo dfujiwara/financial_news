@@ -55,14 +55,12 @@ export class NewsRssParser {
 async function fetch(url: string): Promise<FetchedItem[]> {
   const parser = new Parser()
   const results = await parser.parseURL(url)
-  return results.items.map((item) => {
-    return {
+  return results.items.map((item) => ({
       title: item.title,
       link: item.link,
       pubDate: item.pubDate,
       contentSnippet: item.contentSnippet
-    }
-  })
+  }))
 }
 
 async function analyze(content: string): Promise<SentimentAnalysisResult> {
