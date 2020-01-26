@@ -13,6 +13,17 @@ export interface NewsData {
   date: string
 }
 
+export interface FetchedItem {
+  title?: string,
+  link?: string,
+  pubDate?: string,
+  contentSnippet?: string
+}
+
+export interface RSSFetcher {
+  fetch(url: string): Promise<FetchedItem[]>
+}
+
 export interface SentimentAnalyzer {
   analyze(content: string): Promise<SentimentAnalysisResult>
 }
@@ -22,17 +33,19 @@ export interface NewsRssStorage {
 }
 
 export class NewsRssParser {
+  private readonly fetcher: RSSFetcher
   private readonly analyzer: SentimentAnalyzer
   private readonly storage: NewsRssStorage
 
-  constructor(analyzer: SentimentAnalyzer = new Analyzer(), storage: NewsRssStorage = new Storage()) {
+  constructor(fetcher: RSSFetcher = new Fetcher(), analyzer: SentimentAnalyzer = new Analyzer(), storage: NewsRssStorage = new Storage()) {
+    this.fetcher = fetcher
     this.analyzer = analyzer
     this.storage = storage
   }
 
   async parse(url: string): Promise<NewsData[]> {
-    let feed = await this.fetchRSS(url)
-    const promises = feed.items.map(async item => {
+    let items = await this.fetcher.fetch(url)
+    const promises = items.map(async item => {
       const sentimentResult = await this.analyzer.analyze(`${item.title}:${item.contentSnippet}`)
       const data = {
         title: item.title,
@@ -45,16 +58,31 @@ export class NewsRssParser {
     })
     return Promise.all(promises)
   }
+}
 
-  private async fetchRSS(url: string) {
-    let parser = new Parser()
-    let feed = await parser.parseURL(url)
-    return feed
+class Fetcher implements RSSFetcher {
+  private readonly parser: Parser
+
+  constructor() {
+    this.parser = new Parser()
+  }
+
+  async fetch(url: string): Promise<FetchedItem[]> {
+    const results = await this.parser.parseURL(url)
+    return results.items.map((item) => {
+      return {
+        title: item.title,
+        link: item.link,
+        pubDate: item.pubDate,
+        contentSnippet: item.contentSnippet
+      }
+    })
   }
 }
 
 class Analyzer implements SentimentAnalyzer {
   private readonly client: LanguageServiceClient
+
   constructor() {
     this.client = new LanguageServiceClient()
   }
