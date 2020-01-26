@@ -1,6 +1,6 @@
 import * as Parser from 'rss-parser'
 import { LanguageServiceClient } from '@google-cloud/language'
-import { Firestore, WriteResult } from '@google-cloud/firestore'
+import { Firestore } from '@google-cloud/firestore'
 
 interface SentimentAnalysisResult {
   score: number,
