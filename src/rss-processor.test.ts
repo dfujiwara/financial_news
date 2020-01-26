@@ -1,30 +1,22 @@
-import { NewsRssParser, NewsRssStorage, SentimentAnalyzer } from './rss-processor'
-import * as Parser from 'rss-parser'
-
-jest.mock('rss-parser')
+import { NewsRssParser, NewsRssStorage, SentimentAnalyzer, RSSFetcher } from './rss-processor'
 
 describe('For rss processing', () => {
+    let fetcher: RSSFetcher
     let storage: NewsRssStorage
     let analyzer: SentimentAnalyzer
     beforeEach(() => {
-        Parser.prototype.parseURL = jest.fn(
-            (
-            feedUrl: string,
-            callback?: (err: Error, feed: Parser.Output) => void,
-            redirectCount?: number
-            ) => {
-                return Promise.resolve({
-                    items: [
-                        {
-                        title: "title",
-                        link: "https://link.news.com",
-                        pubDate: "",
-                        contentSnipped: "snippet"
-                        }
-                    ]
-                    })
-            }
-        )
+        fetcher = {
+          fetch: jest.fn(() =>
+            Promise.resolve([
+              {
+                title: "title",
+                link: "https://link.news.com",
+                pubDate: "",
+                contentSnipped: "snippet"
+              }
+            ])
+          )
+        }
         storage = {
             storeData: jest.fn()
         }
@@ -33,9 +25,9 @@ describe('For rss processing', () => {
         }
     })
     test('sentiment results are returned correctly', async () => {
-        const parser = new NewsRssParser(analyzer, storage)
+        const parser = new NewsRssParser(fetcher, analyzer, storage)
         const newsData = await parser.parse('https://news.com')
-        expect(Parser).toHaveBeenCalledTimes(1)
+        expect(fetcher.fetch).toHaveBeenCalledTimes(1)
         expect(analyzer.analyze).toHaveBeenCalledTimes(1)
         expect(storage.storeData).toHaveBeenCalledTimes(1)
         expect(newsData.length).toEqual(1)
