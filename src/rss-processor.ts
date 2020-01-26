@@ -20,94 +20,66 @@ export interface FetchedItem {
   contentSnippet?: string
 }
 
-export interface RSSFetcher {
-  fetch(url: string): Promise<FetchedItem[]>
-}
-
-export interface SentimentAnalyzer {
-  analyze(content: string): Promise<SentimentAnalysisResult>
-}
-
-export interface NewsRssStorage {
-  storeData(data: NewsData): Promise<void>
-}
+export type FetchClosure = (url: string) => Promise<FetchedItem[]>
+export type AnalyzeClosure = (content: string) => Promise<SentimentAnalysisResult>
+export type StorageClosure = (data: NewsData) => Promise<void>
 
 export class NewsRssParser {
-  private readonly fetcher: RSSFetcher
-  private readonly analyzer: SentimentAnalyzer
-  private readonly storage: NewsRssStorage
+  private readonly fetch: FetchClosure
+  private readonly analyze: AnalyzeClosure
+  private readonly store: StorageClosure
 
-  constructor(fetcher: RSSFetcher = new Fetcher(), analyzer: SentimentAnalyzer = new Analyzer(), storage: NewsRssStorage = new Storage()) {
-    this.fetcher = fetcher
-    this.analyzer = analyzer
-    this.storage = storage
+  constructor(fetchClosure: FetchClosure = fetch, analyzeClosure: AnalyzeClosure = analyze, storageClosure: StorageClosure = storeData)  {
+    this.fetch = fetchClosure
+    this.analyze = analyzeClosure
+    this.store = storageClosure
   }
 
   async parse(url: string): Promise<NewsData[]> {
-    let items = await this.fetcher.fetch(url)
+    let items = await this.fetch(url)
     const promises = items.map(async item => {
-      const sentimentResult = await this.analyzer.analyze(`${item.title}:${item.contentSnippet}`)
+      const sentimentResult = await this.analyze(`${item.title}:${item.contentSnippet}`)
       const data = {
         title: item.title,
         sentimentResult,
         link: item.link,
         date: item.pubDate
       }
-      await this.storage.storeData(data)
+      await this.store(data)
       return data
     })
     return Promise.all(promises)
   }
 }
 
-class Fetcher implements RSSFetcher {
-  private readonly parser: Parser
-
-  constructor() {
-    this.parser = new Parser()
-  }
-
-  async fetch(url: string): Promise<FetchedItem[]> {
-    const results = await this.parser.parseURL(url)
-    return results.items.map((item) => {
-      return {
-        title: item.title,
-        link: item.link,
-        pubDate: item.pubDate,
-        contentSnippet: item.contentSnippet
-      }
-    })
-  }
-}
-
-class Analyzer implements SentimentAnalyzer {
-  private readonly client: LanguageServiceClient
-
-  constructor() {
-    this.client = new LanguageServiceClient()
-  }
-  async analyze(content: string): Promise<SentimentAnalysisResult> {
-    const document = {
-      content,
-      type: "PLAIN_TEXT"
+async function fetch(url: string): Promise<FetchedItem[]> {
+  const parser = new Parser()
+  const results = await parser.parseURL(url)
+  return results.items.map((item) => {
+    return {
+      title: item.title,
+      link: item.link,
+      pubDate: item.pubDate,
+      contentSnippet: item.contentSnippet
     }
-    const [result] = await this.client.analyzeSentiment({ document: document })
-    const sentiment = result.documentSentiment
-    return {score: sentiment.score, magnitude: sentiment.magnitude}
-  }
+  })
 }
 
-class Storage implements NewsRssStorage  {
-  private readonly firestore: Firestore
-  private readonly collectionName = 'financial-rss-feed'
-
-  constructor() {
-    this.firestore = new Firestore()
+async function analyze(content: string): Promise<SentimentAnalysisResult> {
+  const document = {
+    content,
+    type: "PLAIN_TEXT"
   }
+  const client = new LanguageServiceClient()
+  const [result] = await client.analyzeSentiment({ document: document })
+  const sentiment = result.documentSentiment
+  return {score: sentiment.score, magnitude: sentiment.magnitude}
+}
 
-  async storeData(data: NewsData): Promise<void> {
-    const docRef = this.firestore.collection(this.collectionName).doc(data.title)
+async function storeData(data: NewsData): Promise<void> {
+    const firestore = new Firestore()
+    const collectionName = 'financial-rss-feed'
+    const docRef = firestore.collection(collectionName).doc(data.title)
     await docRef.set(data)
     return Promise.resolve()
-  }
 }
