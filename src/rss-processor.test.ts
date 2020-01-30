@@ -1,4 +1,5 @@
 import { NewsRssParser, StorageClosure, FetchClosure, AnalyzeClosure } from './rss-processor'
+import { AnalyzedNewsData } from './data-models'
 
 describe('For rss processing', () => {
     let fetch: FetchClosure
@@ -10,12 +11,12 @@ describe('For rss processing', () => {
             {
               title: "title",
               link: "https://link.news.com",
-              pubDate: "",
-              contentSnipped: "snippet"
+              date: "",
+              contentSnippet: "snippet"
             }
           ])
         )
-        store = jest.fn()
+        store = jest.fn((data: AnalyzedNewsData) => Promise.resolve(data))
         analyze = jest.fn(() => Promise.resolve({score: 10, magnitude: 11}))
     })
     test('sentiment results are returned correctly', async () => {
