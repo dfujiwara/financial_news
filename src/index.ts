@@ -1,11 +1,11 @@
-import { NewsRssParser,  NewsData} from './rss-processor'
+import { NewsRssParser } from './rss-processor'
 export { dispatchFinancialNewsProcessing } from './dispatcher'
 
 export interface Message {
   data: string
 }
 
-export async function processNewsRSS(pubSubMessage: Message): Promise<NewsData[]> {
+export async function processNewsRSS(pubSubMessage: Message) {
   const decodedData = Buffer.from(pubSubMessage.data, 'base64').toString()
   const { json: { url: url} } = JSON.parse(decodedData)
   if (!url) {

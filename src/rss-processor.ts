@@ -1,28 +1,11 @@
 import * as Parser from 'rss-parser'
 import { LanguageServiceClient } from '@google-cloud/language'
 import { Firestore } from '@google-cloud/firestore'
+import { NewsData, AnalyzedNewsData, SentimentAnalysisResult} from './data-models'
 
-export interface SentimentAnalysisResult {
-  score: number,
-  magnitude: number
-}
-export interface NewsData {
-  title: string,
-  link: string,
-  sentimentResult: {score: number, magnitude: number},
-  date: string
-}
-
-export interface FetchedItem {
-  title?: string,
-  link?: string,
-  pubDate?: string,
-  contentSnippet?: string
-}
-
-export type FetchClosure = (url: string) => Promise<FetchedItem[]>
+export type FetchClosure = (url: string) => Promise<NewsData[]>
 export type AnalyzeClosure = (content: string) => Promise<SentimentAnalysisResult>
-export type StorageClosure = (data: NewsData) => Promise<void>
+export type StorageClosure = (data: AnalyzedNewsData) => Promise<AnalyzedNewsData>
 
 export class NewsRssParser {
   private readonly fetch: FetchClosure
@@ -35,31 +18,24 @@ export class NewsRssParser {
     this.store = storageClosure
   }
 
-  async parse(url: string): Promise<NewsData[]> {
+  async parse(url: string): Promise<AnalyzedNewsData[]> {
     let items = await this.fetch(url)
     const promises = items.map(async item => {
       const sentimentResult = await this.analyze(`${item.title}:${item.contentSnippet}`)
-      const data = {
-        title: item.title,
-        sentimentResult,
-        link: item.link,
-        date: item.pubDate
-      }
-      await this.store(data)
-      return data
+      return this.store({ ...item, sentimentResult })
     })
     return Promise.all(promises)
   }
 }
 
-async function fetch(url: string): Promise<FetchedItem[]> {
+async function fetch(url: string): Promise<NewsData[]> {
   const parser = new Parser()
   const results = await parser.parseURL(url)
   return results.items.map((item) => ({
-      title: item.title,
-      link: item.link,
-      pubDate: item.pubDate,
-      contentSnippet: item.contentSnippet
+      title: item.title || 'undefined',
+      link: item.link || 'undefined',
+      date: item.pubDate || 'undefined',
+      contentSnippet: item.contentSnippet || 'undefined'
   }))
 }
 
@@ -74,10 +50,10 @@ async function analyze(content: string): Promise<SentimentAnalysisResult> {
   return {score: sentiment.score, magnitude: sentiment.magnitude}
 }
 
-async function storeData(data: NewsData): Promise<void> {
+async function storeData(data: AnalyzedNewsData): Promise<AnalyzedNewsData> {
     const firestore = new Firestore()
     const collectionName = 'financial-rss-feed'
     const docRef = firestore.collection(collectionName).doc(data.title)
     await docRef.set(data)
-    return Promise.resolve()
+    return data
 }
