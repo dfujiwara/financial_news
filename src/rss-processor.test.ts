@@ -1,32 +1,41 @@
-import { NewsRssParser, StorageClosure, FetchClosure, AnalyzeClosure } from './rss-processor'
-import { AnalyzedNewsData } from './data-models'
+import { processNewsRSS, Message } from './rss-processor'
+import * as Fetcher from './rss-fetcher'
+
+jest.mock('./rss-fetcher', () => ({ fetch: jest.fn(() => Promise.reject('fail!'))}))
 
 describe('For rss processing', () => {
-    let fetch: FetchClosure
-    let store: StorageClosure
-    let analyze: AnalyzeClosure
-    beforeEach(() => {
-        fetch = jest.fn(() =>
-          Promise.resolve([
-            {
-              title: "title",
-              link: "https://link.news.com",
-              date: "",
-              contentSnippet: "snippet"
-            }
-          ])
-        )
-        store = jest.fn((data: AnalyzedNewsData) => Promise.resolve(data))
-        analyze = jest.fn(() => Promise.resolve({score: 10, magnitude: 11}))
+    let message: Message
+    describe('if the URL parameter is missing from the pubsub data', () => {
+        beforeEach(() => {
+          const dataPayload = { json: { abc: "ninja" } }
+          const dataPayloadJSON = JSON.stringify(dataPayload)
+          message = {
+            data: Buffer.from(dataPayloadJSON).toString("base64")
+          }
+        })
+        test('an error is thrown', () => {
+          expect.assertions(1)
+          processNewsRSS(message).catch(e => {
+            expect(e).toMatch('invalid payload: {"json":{"abc":"ninja"}')
+          })
+        })
     })
-    test('sentiment results are returned correctly', async () => {
-        const parser = new NewsRssParser(fetch, analyze, store)
-        const newsData = await parser.parse('https://news.com')
-        expect(fetch).toHaveBeenCalledTimes(1)
-        expect(analyze).toHaveBeenCalledTimes(1)
-        expect(store).toHaveBeenCalledTimes(1)
-        expect(newsData.length).toEqual(1)
-        expect(newsData[0].sentimentResult.score).toEqual(10)
-        expect(newsData[0].sentimentResult.magnitude).toEqual(11)
+    describe('if the URL parameter is in the pubsub data', () => {
+        beforeEach(() => {
+          const dataPayload = { json: { url: "ninja" } }
+          const dataPayloadJSON = JSON.stringify(dataPayload)
+          message = {
+            data: Buffer.from(dataPayloadJSON).toString("base64")
+          }
+        })
+        test('processing RSS happens', async () => {
+          try {
+            await processNewsRSS(message)
+            fail()
+          } catch (e) {
+            expect(Fetcher.fetch).toHaveBeenCalledTimes(1)
+            expect(e).toMatch('fail!')
+          }
+        })
     })
 })
