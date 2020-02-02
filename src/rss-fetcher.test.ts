@@ -24,7 +24,7 @@ describe('For fetching rss', () => {
         const firstItem = data[0]
         expect(firstItem.title).toBe('title')
         expect(firstItem.link).toBe('https://link.news.com')
-        expect(firstItem.date).toBe('2020-01-29')
+        expect(firstItem.date).toStrictEqual(new Date('2020-01-29'))
         expect(firstItem.contentSnippet).toBe('snippet')
     })
   })
@@ -43,7 +43,7 @@ describe('For fetching rss', () => {
         const firstItem = data[0]
         expect(firstItem.title).toBe('undefined')
         expect(firstItem.link).toBe('undefined')
-        expect(firstItem.date).toBe('undefined')
+        expect(firstItem.date.toString()).toEqual(new Date('undefined').toString())
         expect(firstItem.contentSnippet).toBe('undefined')
     })
   })
