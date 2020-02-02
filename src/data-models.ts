@@ -6,7 +6,7 @@ export interface SentimentAnalysisResult {
 export interface NewsData {
   title: string,
   link: string,
-  date: string,
+  date: Date,
   contentSnippet: string
 }
 

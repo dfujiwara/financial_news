@@ -10,7 +10,7 @@ describe('For analyzing sentiment of rss', () => {
         newsData = {
             title: 'abc',
             link: 'https://news.com',
-            date: '2020-01-29',
+            date: new Date('2020-01-29'),
             contentSnippet: 'abc'
         }
         LanguageServiceClient.prototype.analyzeSentiment = jest.fn(() => Promise.resolve([{

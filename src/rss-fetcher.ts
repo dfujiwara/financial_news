@@ -7,7 +7,7 @@ export async function fetch(url: string): Promise<NewsData[]> {
   return results.items.map((item) => ({
       title: item.title || 'undefined',
       link: item.link || 'undefined',
-      date: item.pubDate || 'undefined',
+      date: new Date(item.pubDate),
       contentSnippet: item.contentSnippet || 'undefined'
   }))
 }
