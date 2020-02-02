@@ -13,9 +13,7 @@ export async function store(data: AnalyzedNewsData): Promise<AnalyzedNewsData> {
     return data
 }
 
-export async function get(fromDate: Date = new Date(), forDays: number): Promise<AnalyzedNewsData[]> {
-    const millisecondsInDay = 1000 * 60 * 60 * 24
-    const toDate = new Date(fromDate.getTime() - (millisecondsInDay * forDays))
+export async function get(fromDate: Date, toDate: Date): Promise<AnalyzedNewsData[]> {
     const firestore = new Firestore()
     const collection = firestore.collection(collectionName)
     const snapShot = await collection
