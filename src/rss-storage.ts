@@ -1,8 +1,16 @@
-import { Firestore } from '@google-cloud/firestore'
-import { AnalyzedNewsData } from './data-models'
+import { Firestore, Timestamp } from '@google-cloud/firestore'
+import { AnalyzedNewsData, SentimentAnalysisResult } from './data-models'
 import * as crypto from 'crypto'
 
 const collectionName = 'financial-rss-feed'
+
+interface FireStoreNewsData {
+  title: string,
+  link: string,
+  date: Timestamp,
+  contentSnippet: string,
+  sentimentResult: SentimentAnalysisResult
+}
 
 export async function store(data: AnalyzedNewsData): Promise<AnalyzedNewsData> {
     const firestore = new Firestore()
@@ -21,11 +29,11 @@ export async function get(fromDate: Date, toDate: Date): Promise<AnalyzedNewsDat
         .where('date', '>', toDate)
         .get()
     return snapShot.docs.map(doc => {
-        const data = doc.data() as AnalyzedNewsData
+        const data = doc.data() as FireStoreNewsData
         return {
             title: data.title,
             link: data.link,
-            date: data.date,
+            date: data.date.toDate(),
             contentSnippet: data.contentSnippet,
             sentimentResult: data.sentimentResult
         }
