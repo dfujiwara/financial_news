@@ -8,6 +8,7 @@ export async function retrieve(req: Request, res: Response) {
   const toDate = new Date(fromDate.getTime() - millisecondsInDay * forDays)
   try {
     const results = await get(fromDate, toDate)
+    res.set('Access-Control-Allow-Origin', '*')
     res.json(results)
   } catch (e) {
     console.error(e);
