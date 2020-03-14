@@ -11,7 +11,8 @@
     "rss-processor": "npm run build && gcloud functions deploy news-rss-processor --entry-point processNewsRSS --runtime nodejs8 --trigger-topic financial-news-processing",
     "rss-http": "npm run build && gcloud functions deploy news-rss-http --entry-point retrieve --runtime nodejs8 --trigger-http",
     "deploy": "npm run dispatcher && npm run rss-processor && npm run rss-http",
-    "lint": "eslint src --ext .ts"
+    "lint": "eslint src --ext .ts",
+    "ci": "npm run lint && npm run test"
   },
   "author": "daisuke.fujiwara@gmail.com",
   "license": "MIT",
