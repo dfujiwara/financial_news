@@ -11,11 +11,15 @@ describe('For analyzing sentiment of rss', () => {
             title: 'abc',
             link: 'https://news.com',
             date: new Date('2020-01-29'),
-            contentSnippet: 'abc'
+            contentSnippet: 'abc',
         }
-        LanguageServiceClient.prototype.analyzeSentiment = jest.fn(() => Promise.resolve([{
-            documentSentiment: {score: 10, magnitude: 11}
-        }]))
+        LanguageServiceClient.prototype.analyzeSentiment = jest.fn(() =>
+            Promise.resolve([
+                {
+                    documentSentiment: { score: 10, magnitude: 11 },
+                },
+            ]),
+        )
     })
     test('appropriate sentiment data with score and magnitude is created', async () => {
         const analyzedData = await analyze(newsData)
