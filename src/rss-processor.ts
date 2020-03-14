@@ -1,12 +1,13 @@
 import { fetch } from './rss-fetcher'
 import { analyze } from './sentiment-analysis'
 import { store } from './rss-storage'
+import { AnalyzedNewsData } from './data-models'
 
 export interface Message {
     data: string
 }
 
-export async function processNewsRSS(pubSubMessage: Message) {
+export async function processNewsRSS(pubSubMessage: Message): Promise<AnalyzedNewsData[]> {
     const decodedData = Buffer.from(pubSubMessage.data, 'base64').toString()
     const {
         json: { url: url },
