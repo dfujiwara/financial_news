@@ -3,7 +3,7 @@ import { get } from './rss-storage'
 
 const millisecondsInDay = 1000 * 60 * 60 * 24
 
-export async function retrieve(req: Request, res: Response) {
+export async function retrieve(req: Request, res: Response): Promise<void> {
     const fromDate = new Date()
     const forDays = 14
     const toDate = new Date(fromDate.getTime() - millisecondsInDay * forDays)
