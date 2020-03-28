@@ -10,6 +10,7 @@ export async function retrieve(req: Request, res: Response): Promise<void> {
     try {
         const results = await get(fromDate, toDate)
         res.set('Access-Control-Allow-Origin', '*')
+        res.set('Cache-Control', 'max-age=7200')
         res.json({ results })
     } catch (e) {
         console.error(e)
