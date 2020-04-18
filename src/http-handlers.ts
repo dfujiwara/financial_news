@@ -2,10 +2,12 @@ import { Request, Response } from 'express'
 import { get } from './rss-storage'
 
 const millisecondsInDay = 1000 * 60 * 60 * 24
+const forDays = 14
 
 export async function retrieve(req: Request, res: Response): Promise<void> {
-    const fromDate = new Date()
-    const forDays = 14
+    const dateString = req.query.fromDateString
+    const parsedDate = Date.parse(dateString)
+    const fromDate = isNaN(parsedDate) ? new Date() : new Date(parsedDate)
     const toDate = new Date(fromDate.getTime() - millisecondsInDay * forDays)
     try {
         const results = await get(fromDate, toDate)
